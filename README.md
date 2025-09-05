@@ -104,4 +104,156 @@ class Order:
         return sum(item.price * item.quantity for item in self.items)
 ```
 
+# Объяснение:
+* OrderItem и Order отвечают только за хранение данных
+* Минимальная бизнес-логика (только вычисление суммы)
+* Легко тестировать и изменять
 
+
+* Абстракции (DIP, ISP)
+Принцип инверсии зависимостей и Принцип разделения интерфейсов: Зависим от абстракций, а не от конкретных реализаций.
+
+```
+from abc import ABC, abstractmethod
+
+class PaymentProcessor(ABC):
+    """Абстракция для обработки платежей"""
+    @abstractmethod
+    def process_payment(self, amount: float) -> bool:
+        pass
+
+class NotificationService(ABC):
+    """Абстракция для службы уведомлений"""
+    @abstractmethod
+    def send_notification(self, message: str) -> bool:
+        pass
+```
+
+# Объяснение:
+* DIP: Высокоуровневые модули не зависят от низкоуровневых
+* ISP: Интерфейсы разделены по ответственности
+* Легко добавлять новые реализации
+
+
+* Конкретные реализации (LSP)
+Принцип подстановки Лисков: Подтипы могут заменять базовые типы.
+
+```
+class CreditCardProcessor(PaymentProcessor):
+    """Реализация обработки кредитных карт"""
+    def process_payment(self, amount: float) -> bool:
+        print(f"Processing credit card payment: ${amount}")
+        return True
+
+class PayPalProcessor(PaymentProcessor):
+    """Реализация обработки PayPal"""
+    def process_payment(self, amount: float) -> bool:
+        print(f"Processing PayPal payment: ${amount}")
+        return True
+
+class EmailNotification(NotificationService):
+    """Реализация email уведомлений"""
+    def send_notification(self, message: str) -> bool:
+        print(f"Sending email: {message}")
+        return True
+
+class SMSNotification(NotificationService):
+    """Реализация SMS уведомлений"""
+    def send_notification(self, message: str) -> bool:
+        print(f"Sending SMS: {message}")
+        return True
+```
+
+# Объяснение:
+* LSP: Все реализации могут использоваться вместо абстракций
+* Одинаковый интерфейс методов
+* Не выбрасывают неожиданных исключений
+
+
+* Сервис заказов (OCP)
+Принцип открытости/закрытости: Класс открыт для расширения, но закрыт для модификации.
+
+```
+class OrderService:
+    """Сервис для обработки заказов"""
+    
+    def __init__(self, 
+                 payment_processor: PaymentProcessor,
+                 notification_service: NotificationService):
+        self.payment_processor = payment_processor
+        self.notification_service = notification_service
+    
+    def process_order(self, order: Order) -> bool:
+        """Обрабатывает заказ (платеж + уведомление)"""
+        try:
+            # Обработка платежа
+            payment_success = self.payment_processor.process_payment(order.total_amount)
+            
+            if payment_success:
+                # Отправка уведомления
+                message = f"Order {order.order_id} processed successfully. Total: ${order.total_amount}"
+                self.notification_service.send_notification(message)
+                return True
+            
+            return False
+            
+        except Exception as e:
+            error_message = f"Order processing failed: {e}"
+            self.notification_service.send_notification(error_message)
+            return False
+```
+
+# Объяснение:
+* OCP: Можно добавлять новые платежные системы без изменения класса
+* Инъекция зависимостей через конструктор
+* Обработка ошибок и уведомления
+
+
+* Использование
+
+```
+def main():
+    """Демонстрация работы системы"""
+    
+    # Создаем тестовый заказ
+    items = [
+        OrderItem("prod1", 2, 25.0),
+        OrderItem("prod2", 1, 50.0),
+        OrderItem("prod3", 3, 10.0)
+    ]
+    order = Order("order123", items, 130.0)
+    
+    # Конфигурация 1: Credit Card + Email
+    print("=== Конфигурация 1: Credit Card + Email ===")
+    credit_card_processor = CreditCardProcessor()
+    email_notification = EmailNotification()
+    
+    order_service_1 = OrderService(credit_card_processor, email_notification)
+    success_1 = order_service_1.process_order(order)
+    print(f"Order processing {'succeeded' if success_1 else 'failed'}")
+    
+    # Конфигурация 2: PayPal + SMS
+    print("\n=== Конфигурация 2: PayPal + SMS ===")
+    paypal_processor = PayPalProcessor()
+    sms_notification = SMSNotification()
+    
+    order_service_2 = OrderService(paypal_processor, sms_notification)
+    success_2 = order_service_2.process_order(order)
+    print(f"Order processing {'succeeded' if success_2 else 'failed'}")
+
+if __name__ == "__main__":
+    main()
+```
+
+## Вывод программы: 
+```
+=== Конфигурация 1: Credit Card + Email ===
+Processing credit card payment: $130.0
+Sending email: Order order123 processed successfully. Total: $130.0
+Order processing succeeded
+
+=== Конфигурация 2: PayPal + SMS ===
+Processing PayPal payment: $130.0
+Sending SMS: Order order123 processed successfully. Total: $130.0
+Order processing succeeded
+```
