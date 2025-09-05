@@ -256,3 +256,5 @@ Processing PayPal payment: $130.0
 Sending SMS: Order order123 processed successfully. Total: $130.0
 Order processing succeeded
 ```
+
+Комплексный пример с соблюдением всех принципов SOLID: [Клик](https://github.com/pyScripter1/Solid-on-python/blob/main/complex_solid_example.py)
