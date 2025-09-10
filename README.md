@@ -81,7 +81,7 @@ SOLID-принципы Дяди Боба расшифровываются сле
 # Модели данных (SRP)
 Принцип единственной ответственности: Классы данных отвечают только за хранение информации.
 
-```
+```python
 from dataclasses import dataclass
 from typing import List
 
@@ -113,7 +113,7 @@ class Order:
 # Абстракции (DIP, ISP)
 Принцип инверсии зависимостей и Принцип разделения интерфейсов: Зависим от абстракций, а не от конкретных реализаций.
 
-```
+```python
 from abc import ABC, abstractmethod
 
 class PaymentProcessor(ABC):
@@ -138,7 +138,7 @@ class NotificationService(ABC):
 # Конкретные реализации (LSP)
 Принцип подстановки Лисков: Подтипы могут заменять базовые типы.
 
-```
+```python
 class CreditCardProcessor(PaymentProcessor):
     """Реализация обработки кредитных карт"""
     def process_payment(self, amount: float) -> bool:
@@ -173,7 +173,7 @@ class SMSNotification(NotificationService):
 # Сервис заказов (OCP)
 Принцип открытости/закрытости: Класс открыт для расширения, но закрыт для модификации.
 
-```
+```python
 class OrderService:
     """Сервис для обработки заказов"""
     
@@ -210,7 +210,7 @@ class OrderService:
 
 
 # Использование
-```
+```python
 def main():
     """Демонстрация работы системы"""
     
@@ -245,7 +245,7 @@ if __name__ == "__main__":
 ```
 
 ## Вывод программы: 
-```
+```python
 === Конфигурация 1: Credit Card + Email ===
 Processing credit card payment: $130.0
 Sending email: Order order123 processed successfully. Total: $130.0
